@@ -204,20 +204,17 @@ public:
 	TextEditor();
 	~TextEditor();
 
-	void SetLanguageDefinition(const LanguageDefinition& aLanguageDef);
+	void SetLanguageDefinition(const LanguageDefinition&);
 	const char* GetLanguageDefinitionName() const;
 
 	const Palette& GetPalette() const { return mPaletteBase; }
-	void SetPalette(const Palette& aValue);
-
-	void SetErrorMarkers(const ErrorMarkers& aMarkers) { mErrorMarkers = aMarkers; }
-	void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
+	void SetPalette(const Palette&);
 
 	bool Render(const char* aTitle, bool aParentIsFocused = false, const ImVec2& aSize = ImVec2(), bool aBorder = false);
 	void SetText(const std::string& aText);
 	std::string GetText() const;
 
-	void SetTextLines(const std::vector<std::string>& aLines);
+	void SetTextLines(const std::vector<std::string>&);
 	std::vector<std::string> GetTextLines() const;
 
 	std::string GetClipboardText() const;
@@ -225,16 +222,8 @@ public:
 	std::string GetCurrentLineText()const;
 
 	int GetTotalLines() const { return (int)mLines.size(); }
-	bool IsOverwrite() const { return mOverwrite; }
-
-	void SetReadOnly(bool aValue);
-	bool IsReadOnly() const { return mReadOnly; }
-	bool IsTextChanged() const { return mTextChanged; }
 
 	void OnCursorPositionChanged(int aCursor);
-
-	bool IsColorizerEnabled() const { return mColorizerEnabled; }
-	void SetColorizerEnable(bool aValue);
 
 	Coordinates GetCursorPosition() const { return GetActualCursorCoordinates(); }
 	void SetCursorPosition(const Coordinates& aPosition, int aCursor = -1);
@@ -267,21 +256,6 @@ public:
 				SetCursorPosition({ mState.mCursors[c].mCursorPosition.mLine + 1, mState.mCursors[c].mCursorPosition.mColumn }, c);
 		}
 	}
-
-	inline void SetHandleMouseInputs(bool aValue) { mHandleMouseInputs = aValue; }
-	inline bool IsHandleMouseInputsEnabled() const { return mHandleMouseInputs; }
-
-	inline void SetHandleKeyboardInputs(bool aValue) { mHandleKeyboardInputs = aValue; }
-	inline bool IsHandleKeyboardInputsEnabled() const { return mHandleKeyboardInputs; }
-
-	inline void SetImGuiChildIgnored(bool aValue) { mIgnoreImGuiChild = aValue; }
-	inline bool IsImGuiChildIgnored() const { return mIgnoreImGuiChild; }
-
-	inline void SetShowWhitespaces(bool aValue) { mShowWhitespaces = aValue; }
-	inline bool IsShowingWhitespaces() const { return mShowWhitespaces; }
-
-	inline void SetShowShortTabGlyphs(bool aValue) { mShowShortTabGlyphs = aValue; }
-	inline bool IsShowingShortTabGlyphs() const { return mShowShortTabGlyphs; }
 
 	inline ImVec4 U32ColorToVec4(ImU32 in) {
 		float s = 1.0f / 255.0f;
@@ -340,7 +314,19 @@ public:
 
 	void ImGuiDebugPanel(const std::string& panelName = "Debug");
 	void UnitTests();
-private:
+
+	bool ReadOnly;
+	bool Overwrite;
+	bool TextChanged;
+	bool ColorizerEnabled;
+	bool ShouldHandleKeyboardInputs;
+	bool ShouldHandleMouseInputs;
+	bool IgnoreImGuiChild;
+	bool ShowWhitespaces;
+	bool ShowShortTabGlyphs;
+
+	float LineSpacing;
+
 	typedef std::vector<std::pair<std::regex, PaletteIndex>> RegexList;
 
 	struct Cursor
@@ -407,6 +393,12 @@ private:
 
 	typedef std::vector<UndoRecord> UndoBuffer;
 
+	Lines mLines;
+	EditorState mState;
+	UndoBuffer mUndoBuffer;
+	int mUndoIndex;
+
+private:
 	void ProcessInputs();
 	void Colorize(int aFromLine = 0, int aCount = -1);
 	void ColorizeRange(int aFromLine = 0, int aToLine = 0);
@@ -454,29 +446,15 @@ private:
 
 	bool FindNextOccurrence(const char* aText, int aTextSize, const Coordinates& aFrom, Coordinates& outStart, Coordinates& outEnd);
 
-	float mLineSpacing;
-	Lines mLines;
-	EditorState mState;
-	UndoBuffer mUndoBuffer;
-	int mUndoIndex;
-
 	int mTabSize;
-	bool mOverwrite;
-	bool mReadOnly;
 	bool mWithinRender;
 	bool mScrollToCursor;
 	bool mScrollToTop;
-	bool mTextChanged;
-	bool mColorizerEnabled;
 	float mTextStart;                   // position (in pixels) where a code line starts relative to the left of the TextEditor.
 	int  mLeftMargin;
 	int mColorRangeMin, mColorRangeMax;
 	SelectionMode mSelectionMode;
-	bool mHandleKeyboardInputs;
-	bool mHandleMouseInputs;
-	bool mIgnoreImGuiChild;
-	bool mShowWhitespaces;
-	bool mShowShortTabGlyphs;
+
 	bool mDraggingSelection = false;
 
 	Palette mPaletteBase;
